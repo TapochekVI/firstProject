@@ -1,0 +1,169 @@
+#include <iostream>
+#include <string>
+#include <cstring>
+
+using namespace std;
+
+// Абстрактный базовый класс Animal
+class Animal {
+protected:
+    string Title;
+    char* Says;
+
+public:
+    Animal(const string& animalTitle) : Title(animalTitle), Says(nullptr) {
+        cout << "Конструктор Animal: " << Title << endl;
+    }
+    
+    virtual ~Animal() {
+        cout << "Деструктор Animal: " << Title << endl;
+        delete[] Says;  // Освобождение памяти в базовом классе
+    }
+
+    virtual void speak() = 0;
+
+    string getTitle() const {
+        return Title;
+    }
+};
+
+// Класс Frog
+class Frog : public Animal {
+public:
+    Frog(const string& frogTitle) : Animal(frogTitle) {
+        cout << "Конструктор Frog: " << Title << endl;
+    }
+    
+    ~Frog() override {
+        cout << "Деструктор Frog: " << Title << endl;
+        // Память освобождается в ~Animal()
+    }
+
+    void speak() override {
+        cout << "Frog::speak() для " << Title << endl;
+        delete[] Says;
+        const char* sound = " говорит 'ква-ква' ";
+        Says = new char[strlen(sound) + 1];
+        strcpy(Says, sound);
+        cout << Title << Says << endl;
+    }
+};
+
+// Класс Dog
+class Dog : public Animal {
+public:
+    Dog(const string& dogTitle) : Animal(dogTitle) {
+        cout << "Конструктор Dog: " << Title << endl;
+    }
+    
+    ~Dog() override {
+        cout << "Деструктор Dog: " << Title << endl;
+        // Память освобождается в ~Animal()
+    }
+
+    void speak() override {
+        cout << "Dog::speak() для " << Title << endl;
+        delete[] Says;
+        const char* sound = " говорит 'гав-гав' ";
+        Says = new char[strlen(sound) + 1];
+        strcpy(Says, sound);
+        cout << Title << Says << endl;
+    }
+};
+
+// Класс Cat
+class Cat : public Animal {
+public:
+    Cat(const string& catTitle) : Animal(catTitle) {
+        cout << "Конструктор Cat: " << Title << endl;
+    }
+    
+    ~Cat() override {
+        cout << "Деструктор Cat: " << Title << endl;
+        // Память освобождается в ~Animal()
+    }
+
+    void speak() override {
+        cout << "Cat::speak() для " << Title << endl;
+        delete[] Says;
+        const char* sound = " говорит 'мяу-мяу' ";
+        Says = new char[strlen(sound) + 1];
+        strcpy(Says, sound);
+        cout << Title << Says << endl;
+    }
+};
+
+// Класс Lion - ИСПРАВЛЕННАЯ ВЕРСИЯ
+class Lion : public Cat {
+public:
+    Lion(const string& lionTitle) : Cat(lionTitle) {
+        cout << "Конструктор Lion: " << Title << endl;
+    }
+    
+    ~Lion() override {
+        cout << "Деструктор Lion: " << Title << endl;
+        // УБРАНО: delete[] Says; - память освобождается в ~Animal()
+    }
+
+    void speak() override {
+        cout << "Lion::speak() для " << Title << endl;
+        delete[] Says;
+        const char* sound = " рычит 'р-р-р-р' ";
+        Says = new char[strlen(sound) + 1];
+        strcpy(Says, sound);
+        cout << Title << Says << endl;
+    }
+};
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    
+    cout << "=== ИССЛЕДОВАНИЕ ИЕРАРХИИ КЛАССОВ (ИСПРАВЛЕННАЯ ВЕРСИЯ) ===" << endl << endl;
+
+    // ШАГ 1: Объявление массива указателей
+    cout << "ШАГ 1: Объявление массива указателей Animal* animals[4]" << endl;
+    Animal* animals[4];
+
+    cout << endl << "ШАГ 2: Создание объектов" << endl;
+    cout << "----------------------------------------" << endl;
+    
+    // ШАГ 2: Создание объектов и инициализация указателей
+    cout << "animals[0] = new Frog(\"Квакер\");" << endl;
+    animals[0] = new Frog("Квакер");
+    cout << endl;
+
+    cout << "animals[1] = new Dog(\"Бобик\");" << endl;
+    animals[1] = new Dog("Бобик");
+    cout << endl;
+
+    cout << "animals[2] = new Cat(\"Мурка\");" << endl;
+    animals[2] = new Cat("Мурка");
+    cout << endl;
+
+    cout << "animals[3] = new Lion(\"Симба\");" << endl;
+    animals[3] = new Lion("Симба");
+    cout << endl;
+
+    cout << "ШАГ 3: Вызов метода speak() в цикле" << endl;
+    cout << "----------------------------------------" << endl;
+    
+    // ШАГ 3: Цикл вызова метода speak()
+    for (int i = 0; i < 4; i++) {
+        cout << "animals[" << i << "]->speak(); // ";
+        animals[i]->speak();
+        cout << endl;
+    }
+
+    cout << "ШАГ 4: Освобождение памяти" << endl;
+    cout << "----------------------------------------" << endl;
+    
+    // ШАГ 4: Освобождение памяти
+    for (int i = 0; i < 4; i++) {
+        cout << "delete animals[" << i << "];" << endl;
+        delete animals[i];
+        cout << endl;
+    }
+
+    cout << "=== ПРОГРАММА ЗАВЕРШЕНА ===" << endl;
+    return 0;
+}
