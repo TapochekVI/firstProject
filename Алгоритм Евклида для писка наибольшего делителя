@@ -1,0 +1,169 @@
+// Класс исключения для непредусмотренного знака операции
+class InvalidOperationException : public std::exception {
+private:
+    std::string message;
+    
+public:
+    InvalidOperationException(const std::string& op) {
+        message = "Непредусмотренный знак операции: '" + op + "'";
+    }
+    
+    const char* what() const noexcept override {
+        return message.c_str();
+    }
+};
+
+// Класс исключения для деления на ноль
+class DivisionByZeroException : public std::exception {
+public:
+    const char* what() const noexcept override {
+        return "Ошибка: Деление на ноль!";
+    }
+};
+
+// Класс калькулятора
+class MyCalc {
+public:
+    // Метод для выполнения арифметической операции
+    double calculate(double a, double b, const std::string& operation) {
+        if (operation == "+") {
+            return a + b;
+        }
+        else if (operation == "-") {
+            return a - b;
+        }
+        else if (operation == "*") {
+            return a * b;
+        }
+        else if (operation == "/") {
+            if (b == 0) {
+                throw DivisionByZeroException();
+            }
+            return a / b;
+        }
+        else {
+            throw InvalidOperationException(operation);
+        }
+    }
+};
+
+// Функция для тестирования калькулятора
+void testCalculator() {
+    MyCalc calculator;
+    
+    // Тестовые случаи
+    struct TestCase {
+        double a;
+        double b;
+        std::string op;
+        std::string description;
+    };
+    
+    TestCase tests[] = {
+        {10, 5, "+", "Сложение"},
+        {10, 5, "-", "Вычитание"},
+        {10, 5, "*", "Умножение"},
+        {10, 5, "/", "Деление"},
+        {10, 0, "/", "Деление на ноль"},
+        {10, 5, "%", "Непредусмотренная операция"}
+    };
+    
+    for (const auto& test : tests) {
+        std::cout << "Тест: " << test.description << " (" 
+                  << test.a << " " << test.op << " " << test.b << ")" << std::endl;
+        
+        try {
+            double result = calculator.calculate(test.a, test.b, test.op);
+            std::cout << "Результат: " << result << std::endl;
+        }
+        catch (const DivisionByZeroException& e) {
+            std::cout << "Исключение: " << e.what() << std::endl;
+        }
+        catch (const InvalidOperationException& e) {
+            std::cout << "Исключение: " << e.what() << std::endl;
+        }
+        catch (const std::exception& e) {
+            std::cout << "Неизвестное исключение: " << e.what() << std::endl;
+        }
+        
+        std::cout << "------------------------" << std::endl;
+    }
+}
+
+// Основная программа с интерактивным режимом
+int main() {
+    setlocale(LC_ALL, "Russian");
+    
+    MyCalc calculator;
+    
+    std::cout << "=== Арифметический калькулятор ===" << std::endl;
+    std::cout << "Поддерживаемые операции: +, -, *, /" << std::endl;
+    std::cout << "Для выхода введите 'q'" << std::endl << std::endl;
+    
+    while (true) {
+        double a, b;
+        std::string operation;
+        
+        // Ввод первого числа
+        std::cout << "Введите первое число: ";
+        std::cin >> a;
+        
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::string input;
+            std::cin >> input;
+            if (input == "q" || input == "Q") {
+                break;
+            }
+            std::cout << "Ошибка ввода числа!" << std::endl;
+            continue;
+        }
+        
+        // Ввод операции
+        std::cout << "Введите операцию (+, -, *, /): ";
+        std::cin >> operation;
+        
+        if (operation == "q" || operation == "Q") {
+            break;
+        }
+        
+        // Ввод второго числа
+        std::cout << "Введите второе число: ";
+        std::cin >> b;
+        
+        if (std::cin.fail()) {
+            std::cin.clear();
+            std::string input;
+            std::cin >> input;
+            if (input == "q" || input == "Q") {
+                break;
+            }
+            std::cout << "Ошибка ввода числа!" << std::endl;
+            continue;
+        }
+        
+        // Вычисление и вывод результата
+        try {
+            double result = calculator.calculate(a, b, operation);
+            std::cout << "Результат: " << a << " " << operation << " " << b << " = " << result << std::endl;
+        }
+        catch (const DivisionByZeroException& e) {
+            std::cout << "Ошибка: " << e.what() << std::endl;
+        }
+        catch (const InvalidOperationException& e) {
+            std::cout << "Ошибка: " << e.what() << std::endl;
+        }
+        catch (const std::exception& e) {
+            std::cout << "Неизвестная ошибка: " << e.what() << std::endl;
+        }
+        
+        std::cout << std::endl;
+    }
+    
+    // Запуск автоматических тестов
+    std::cout << "\n=== Запуск автоматических тестов ===" << std::endl;
+    testCalculator();
+    
+    std::cout << "Программа завершена." << std::endl;
+    return 0;
+}
