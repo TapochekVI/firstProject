@@ -1,0 +1,63 @@
+#include <iostream>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+const int NUM_STUDENTS = 25;
+
+struct Student {
+    string surname;
+    int height;
+};
+
+void inputStudents(Student students[]) {
+    cout << "Введите фамилию и рост для каждого из " << NUM_STUDENTS << " учеников:" << endl;
+    
+    for (int i = 0; i < NUM_STUDENTS; i++) {
+        cout << "\nУченик " << (i + 1) << ":" << endl;
+        cout << "Фамилия: ";
+        cin >> students[i].surname;
+        cout << "Рост (см): ";
+        cin >> students[i].height;
+    }
+}
+
+void sortStudentsByHeight(Student students[]) {
+    // Сортировка пузырьком (альтернатива std::sort)
+    for (int i = 0; i < NUM_STUDENTS - 1; i++) {
+        for (int j = 0; j < NUM_STUDENTS - i - 1; j++) {
+            if (students[j].height > students[j + 1].height) {
+                // Обмен местами
+                Student temp = students[j];
+                students[j] = students[j + 1];
+                students[j + 1] = temp;
+            }
+        }
+    }
+}
+
+void printStudents(const Student students[]) {
+    cout << "\nОтсортированный список учеников:" << endl;
+    cout << "--------------------------------" << endl;
+    
+    for (int i = 0; i < NUM_STUDENTS; i++) {
+        cout << (i + 1) << ". " << students[i].surname 
+             << " - " << students[i].height << " см" << endl;
+    }
+}
+
+int main() {
+    Student students[NUM_STUDENTS];
+    
+    // Ввод данных
+    inputStudents(students);
+    
+    // Сортировка
+    sortStudentsByHeight(students);
+    
+    // Вывод результатов
+    printStudents(students);
+    
+    return 0;
+}
