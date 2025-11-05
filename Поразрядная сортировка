@@ -1,0 +1,94 @@
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <vector>
+
+using namespace std;
+
+// Функция для получения максимального элемента в массиве
+int getMax(const vector<int>& arr) {
+    int max = arr[0];
+    for (size_t i = 1; i < arr.size(); i++) {
+        if (arr[i] > max) {
+            max = arr[i];
+        }
+    }
+    return max;
+}
+
+// Функция для сортировки по определенному разряду
+void countSort(vector<int>& arr, int exp) {
+    vector<int> output(arr.size());
+    vector<int> count(10, 0);
+
+    // Подсчет количества вхождений каждой цифры
+    for (size_t i = 0; i < arr.size(); i++) {
+        count[(arr[i] / exp) % 10]++;
+    }
+
+    // Изменение count[i] так, чтобы count[i] содержал позицию
+    for (int i = 1; i < 10; i++) {
+        count[i] += count[i - 1];
+    }
+
+    // Построение выходного массива
+    for (int i = arr.size() - 1; i >= 0; i--) {
+        output[count[(arr[i] / exp) % 10] - 1] = arr[i];
+        count[(arr[i] / exp) % 10]--;
+    }
+
+    // Копирование выходного массива в arr[]
+    arr = output;
+}
+
+// Основная функция поразрядной сортировки
+void radixSort(vector<int>& arr) {
+    if (arr.empty()) return;
+
+    int max = getMax(arr);
+
+    for (int exp = 1; max / exp > 0; exp *= 10) {
+        countSort(arr, exp);
+    }
+}
+
+// Функция для вывода массива
+void printArray(const vector<int>& arr) {
+    for (size_t i = 0; i < arr.size(); i++) {
+        cout << arr[i];
+        if (i < arr.size() - 1) cout << " ";
+    }
+    cout << endl;
+}
+
+// Функция для генерации случайного массива
+vector<int> generateRandomArray(int size, int minVal = 1, int maxVal = 1000) {
+    vector<int> arr(size);
+    for (int i = 0; i < size; i++) {
+        arr[i] = rand() % (maxVal - minVal + 1) + minVal;
+    }
+    return arr;
+}
+
+int main() {
+    setlocale(LC_ALL, "Russian");
+    srand(time(nullptr));
+
+    srand(time(0));
+
+    const int ARRAY_SIZE = 1000; // Размер массива
+
+    vector<int> arr = generateRandomArray(ARRAY_SIZE, 1, 1000);
+
+    cout << "Исходный массив:" << endl;
+    printArray(arr);
+
+    // Сортировка массива
+    radixSort(arr);
+
+    // Вывод отсортированного массива
+    cout << "Отсортированный массив:" << endl;
+    printArray(arr);
+
+    return 0;
+}
