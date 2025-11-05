@@ -1,0 +1,92 @@
+#include <iostream>
+#include <string>
+#include <vector>
+
+using namespace std;
+
+class NumberToWords {
+private:
+    vector<string> ones = {"", "один", "два", "три", "четыре", "пять", 
+                          "шесть", "семь", "восемь", "девять"};
+    vector<string> teens = {"десять", "одиннадцать", "двенадцать", "тринадцать", 
+                           "четырнадцать", "пятнадцать", "шестнадцать", 
+                           "семнадцать", "восемнадцать", "девятнадцать"};
+    vector<string> tens = {"", "", "двадцать", "тридцать", "сорок", "пятьдесят", 
+                          "шестьдесят", "семьдесят", "восемьдесят", "девяносто"};
+    vector<string> hundreds = {"", "сто", "двести", "триста", "четыреста", 
+                              "пятьсот", "шестьсот", "семьсот", "восемьсот", 
+                              "девятьсот"};
+
+public:
+    string convert(int n) {
+        if (n == 0) return "ноль";
+        if (n == 1000) return "тысяча";
+        
+        return convertThreeDigit(n);
+    }
+    
+private:
+    string convertThreeDigit(int num) {
+        if (num == 0) return "";
+        
+        string result;
+        int h = num / 100;
+        int t = (num % 100) / 10;
+        int o = num % 10;
+        
+        // Сотни
+        if (h > 0) {
+            result += hundreds[h];
+        }
+        
+        // Десятки и единицы
+        if (t == 1) {
+            if (!result.empty()) result += " ";
+            result += teens[o];
+        } else {
+            if (t > 1) {
+                if (!result.empty()) result += " ";
+                result += tens[t];
+            }
+            if (o > 0) {
+                if (!result.empty()) result += " ";
+                result += ones[o];
+            }
+        }
+        
+        return result;
+    }
+};
+
+int main() {
+    NumberToWords converter;
+    int n;
+    
+    cout << "Введите натуральное число (n ≤ 1000): ";
+    cin >> n;
+    
+    if (n < 1 || n > 1000) {
+        cout << "Ошибка: число должно быть от 1 до 1000" << endl;
+        return 1;
+    }
+    
+    string result = converter.convert(n);
+    
+    // Первая буква заглавная
+    if (!result.empty()) {
+        result[0] = toupper(result[0]);
+    }
+    
+    cout << result << endl;
+    
+    // Примеры работы
+    cout << "\nПримеры:" << endl;
+    vector<int> examples = {13, 105, 241, 1000, 7, 99, 450};
+    for (int num : examples) {
+        string word = converter.convert(num);
+        if (!word.empty()) word[0] = toupper(word[0]);
+        cout << num << " - " << word << endl;
+    }
+    
+    return 0;
+}
