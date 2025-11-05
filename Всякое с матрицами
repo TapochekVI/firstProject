@@ -1,0 +1,319 @@
+#include <iostream>
+#include <vector>
+#include <random>
+#include <stdexcept>
+#include <iomanip>
+#include <limits>
+
+class SquareMatrix {
+private:
+    std::vector<std::vector<double>> data;
+    size_t size;
+
+    // Генератор случайных чисел
+    double getRandomNumber() {
+        static std::random_device rd;
+        static std::mt19937 gen(rd());
+        static std::uniform_int_distribution<int> dist(0, 5);
+        return static_cast<double>(dist(gen));
+    }
+
+public:
+    // Конструктор по умолчанию
+    SquareMatrix() : size(10) {
+        initializeMatrix();
+    }
+
+    // Конструктор с заданным размером
+    SquareMatrix(size_t n) : size(n) {
+        if (n == 0) {
+            throw std::invalid_argument("Размер матрицы не может быть нулевым");
+        }
+        initializeMatrix();
+    }
+
+    // Конструктор с заданными значениями (для тестирования)
+    SquareMatrix(const std::vector<std::vector<double>>& values) {
+        if (values.empty() || values.size() != values[0].size()) {
+            throw std::invalid_argument("Матрица должна быть квадратной");
+        }
+        size = values.size();
+        data = values;
+    }
+
+private:
+    void initializeMatrix() {
+        data.resize(size, std::vector<double>(size));
+        for (size_t i = 0; i < size; ++i) {
+            for (size_t j = 0; j < size; ++j) {
+                data[i][j] = getRandomNumber();
+            }
+        }
+    }
+
+public:
+    // Метод конвертирования - замена значений обратными числами
+    void convertToInverse() {
+        for (size_t i = 0; i < size; ++i) {
+            for (size_t j = 0; j < size; ++j) {
+                if (data[i][j] == 0) {
+                    throw std::runtime_error("Обнаружен ноль в позиции [" + 
+                                           std::to_string(i) + "][" + 
+                                           std::to_string(j) + "]. Деление на ноль невозможно.");
+                }
+                data[i][j] = 1.0 / data[i][j];
+            }
+        }
+    }
+
+    // Безопасный метод конвертирования с заменой нулей на заданное значение
+    void safeConvertToInverse(double replacement = 1.0) {
+        for (size_t i = 0; i < size; ++i) {
+            for (size_t j = 0; j < size; ++j) {
+                if (data[i][j] == 0) {
+                    data[i][j] = replacement;
+                    std::cout << "Предупреждение: ноль в позиции [" << i << "][" << j 
+                              << "] заменен на " << replacement << std::endl;
+                } else {
+                    data[i][j] = 1.0 / data[i][j];
+                }
+            }
+        }
+    }
+
+    // Получение элемента матрицы
+    double getElement(size_t i, size_t j) const {
+        if (i >= size || j >= size) {
+            throw std::out_of_range("Индекс выходит за границы матрицы");
+        }
+        return data[i][j];
+    }
+
+    // Установка элемента матрицы
+    void setElement(size_t i, size_t j, double value) {
+        if (i >= size || j >= size) {
+            throw std::out_of_range("Индекс выходит за границы матрицы");
+        }
+        data[i][j] = value;
+    }
+
+    // Получение размера матрицы
+    size_t getSize() const {
+        return size;
+    }
+
+    // Вывод матрицы
+    void print(const std::string& title = "Матрица:") const {
+        std::cout << title << " (размер " << size << "x" << size << ")" << std::endl;
+        for (size_t i = 0; i < size; ++i) {
+            for (size_t j = 0; j < size; ++j) {
+                std::cout << std::setw(10) << std::fixed << std::setprecision(4) << data[i][j];
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    // Проверка наличия нулей в матрице
+    bool hasZeros() const {
+        for (size_t i = 0; i < size; ++i) {
+            for (size_t j = 0; j < size; ++j) {
+                if (data[i][j] == 0) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Получение позиций всех нулей
+    std::vector<std::pair<size_t, size_t>> getZeroPositions() const {
+        std::vector<std::pair<size_t, size_t>> zeros;
+        for (size_t i = 0; i < size; ++i) {
+            for (size_t j = 0; j < size; ++j) {
+                if (data[i][j] == 0) {
+                    zeros.emplace_back(i, j);
+                }
+            }
+        }
+        return zeros;
+    }
+};
+
+// Функция для тестирования класса
+void testMatrixClass() {
+    std::cout << "=== ТЕСТИРОВАНИЕ КЛАССА КВАДРАТНОЙ МАТРИЦЫ ===" << std::endl;
+
+    // Тест 1: Создание матрицы по умолчанию
+    std::cout << "\n1. Матрица 10x10 по умолчанию:" << std::endl;
+    try {
+        SquareMatrix matrix1;
+        matrix1.print("Исходная матрица 10x10");
+        
+        if (matrix1.hasZeros()) {
+            auto zeros = matrix1.getZeroPositions();
+            std::cout << "Обнаружены нули в позициях: ";
+            for (const auto& pos : zeros) {
+                std::cout << "[" << pos.first << "][" << pos.second << "] ";
+            }
+            std::cout << std::endl;
+        }
+
+        std::cout << "Попытка конвертирования..." << std::endl;
+        matrix1.convertToInverse();
+        matrix1.print("Матрица после конвертирования");
+    }
+    catch (const std::exception& e) {
+        std::cout << "Ошибка: " << e.what() << std::endl;
+    }
+
+    // Тест 2: Матрица с гарантированными нулями
+    std::cout << "\n2. Матрица с нулями (тест исключения):" << std::endl;
+    try {
+        std::vector<std::vector<double>> testData = {
+            {1, 2, 0},
+            {4, 0, 6},
+            {7, 8, 9}
+        };
+        
+        SquareMatrix matrix2(testData);
+        matrix2.print("Тестовая матрица с нулями");
+        
+        std::cout << "Попытка конвертирования..." << std::endl;
+        matrix2.convertToInverse();
+    }
+    catch (const std::runtime_error& e) {
+        std::cout << "Поймано исключение runtime_error: " << e.what() << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cout << "Поймано исключение: " << e.what() << std::endl;
+    }
+
+    // Тест 3: Безопасное конвертирование
+    std::cout << "\n3. Безопасное конвертирование:" << std::endl;
+    try {
+        std::vector<std::vector<double>> testData = {
+            {1, 0, 3},
+            {0, 5, 0},
+            {7, 8, 9}
+        };
+        
+        SquareMatrix matrix3(testData);
+        matrix3.print("Матрица до безопасного конвертирования");
+        
+        matrix3.safeConvertToInverse(0.1); // Заменяем нули на 0.1
+        matrix3.print("Матрица после безопасного конвертирования");
+    }
+    catch (const std::exception& e) {
+        std::cout << "Ошибка: " << e.what() << std::endl;
+    }
+
+    // Тест 4: Матрица без нулей
+    std::cout << "\n4. Матрица без нулей:" << std::endl;
+    try {
+        std::vector<std::vector<double>> testData = {
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9}
+        };
+        
+        SquareMatrix matrix4(testData);
+        matrix4.print("Матрица без нулей");
+        
+        matrix4.convertToInverse();
+        matrix4.print("Матрица после конвертирования");
+    }
+    catch (const std::exception& e) {
+        std::cout << "Ошибка: " << e.what() << std::endl;
+    }
+
+    // Тест 5: Пользовательская матрица
+    std::cout << "\n5. Пользовательская матрица 5x5:" << std::endl;
+    try {
+        SquareMatrix matrix5(5);
+        matrix5.print("Случайная матрица 5x5");
+        
+        if (!matrix5.hasZeros()) {
+            matrix5.convertToInverse();
+            matrix5.print("Матрица после конвертирования");
+        } else {
+            std::cout << "Матрица содержит нули, используем безопасное конвертирование" << std::endl;
+            matrix5.safeConvertToInverse();
+            matrix5.print("Матрица после безопасного конвертирования");
+        }
+    }
+    catch (const std::exception& e) {
+        std::cout << "Ошибка: " << e.what() << std::endl;
+    }
+}
+
+// Демонстрационная программа
+int main() {
+    setlocale(LC_ALL, "Russian");
+
+    std::cout << "=== ПРОГРАММА ДЛЯ РАБОТЫ С КВАДРАТНЫМИ МАТРИЦАМИ ===" << std::endl;
+
+    // Запуск автоматических тестов
+    testMatrixClass();
+
+    // Интерактивный режим
+    std::cout << "\n=== ИНТЕРАКТИВНЫЙ РЕЖИМ ===" << std::endl;
+    
+    try {
+        int choice;
+        std::cout << "Выберите тип матрицы:" << std::endl;
+        std::cout << "1 - Матрица 10x10 по умолчанию" << std::endl;
+        std::cout << "2 - Матрица произвольного размера" << std::endl;
+        std::cout << "Ваш выбор: ";
+        std::cin >> choice;
+
+        SquareMatrix matrix;
+
+        if (choice == 2) {
+            size_t n;
+            std::cout << "Введите размер матрицы: ";
+            std::cin >> n;
+            matrix = SquareMatrix(n);
+        } else {
+            matrix = SquareMatrix();
+        }
+
+        matrix.print("Сгенерированная матрица");
+
+        // Проверка на нули
+        if (matrix.hasZeros()) {
+            std::cout << "Внимание: матрица содержит нулевые элементы!" << std::endl;
+            
+            char safeMode;
+            std::cout << "Использовать безопасный режим конвертирования? (y/n): ";
+            std::cin >> safeMode;
+
+            if (safeMode == 'y' || safeMode == 'Y') {
+                double replacement;
+                std::cout << "Введите значение для замены нулей: ";
+                std::cin >> replacement;
+                matrix.safeConvertToInverse(replacement);
+            } else {
+                try {
+                    matrix.convertToInverse();
+                }
+                catch (const std::runtime_error& e) {
+                    std::cout << "Ошибка при конвертировании: " << e.what() << std::endl;
+                    return 1;
+                }
+            }
+        } else {
+            matrix.convertToInverse();
+        }
+
+        matrix.print("Матрица после конвертирования");
+
+    }
+    catch (const std::exception& e) {
+        std::cout << "Произошла ошибка: " << e.what() << std::endl;
+        return 1;
+    }
+
+    std::cout << "Программа завершена успешно!" << std::endl;
+    return 0;
+}
