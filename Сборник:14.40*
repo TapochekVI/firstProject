@@ -1,0 +1,135 @@
+#include <iostream>
+#include <string>
+
+using namespace std;
+
+// Функция для проверки високосного года
+bool isLeapYear(int year) {
+    return (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);
+}
+
+// Функция для определения количества дней в месяце
+int daysInMonth(int month, int year) {
+    switch (month) {
+        case 1: case 3: case 5: case 7: case 8: case 10: case 12:
+            return 31;
+        case 4: case 6: case 9: case 11:
+            return 30;
+        case 2:
+            return isLeapYear(year) ? 29 : 28;
+        default:
+            return 0; // Некорректный месяц
+    }
+}
+
+// Функция для определения даты предыдущего дня
+void previousDay(int &day, int &month, int &year) {
+    day--;
+    
+    if (day == 0) {
+        month--;
+        if (month == 0) {
+            month = 12;
+            year--;
+        }
+        day = daysInMonth(month, year);
+    }
+}
+
+// Функция для определения даты следующего дня
+void nextDay(int &day, int &month, int &year) {
+    day++;
+    
+    if (day > daysInMonth(month, year)) {
+        day = 1;
+        month++;
+        if (month > 12) {
+            month = 1;
+            year++;
+        }
+    }
+}
+
+// Функция для красивого вывода даты
+void printDate(int day, int month, int year) {
+    string monthNames[12] = {
+        "января", "февраля", "марта", "апреля", "мая", "июня",
+        "июля", "августа", "сентября", "октября", "ноября", "декабря"
+    };
+    
+    cout << day << " " << monthNames[month - 1] << " " << year << " года";
+}
+
+// Функция для проверки корректности даты
+bool isValidDate(int day, int month, int year) {
+    if (year < 1) return false;
+    if (month < 1 || month > 12) return false;
+    if (day < 1 || day > daysInMonth(month, year)) return false;
+    return true;
+}
+
+int main() {
+    int day, month, year;
+    
+    cout << "Введите дату (день месяц год): ";
+    cin >> day >> month >> year;
+    
+    if (!isValidDate(day, month, year)) {
+        cout << "Ошибка: некорректная дата!" << endl;
+        return 1;
+    }
+    
+    // Сохраняем исходную дату
+    int originalDay = day, originalMonth = month, originalYear = year;
+    
+    cout << "\nИсходная дата: ";
+    printDate(day, month, year);
+    cout << endl;
+    
+    // Проверка на високосный год
+    if (isLeapYear(year)) {
+        cout << "Год високосный" << endl;
+    } else {
+        cout << "Год не високосный" << endl;
+    }
+    
+    // а) Предыдущий день
+    cout << "\nа) Предыдущий день: ";
+    previousDay(day, month, year);
+    printDate(day, month, year);
+    cout << endl;
+    
+    // Возвращаем исходную дату
+    day = originalDay;
+    month = originalMonth;
+    year = originalYear;
+    
+    // б) Следующий день
+    cout << "б) Следующий день: ";
+    nextDay(day, month, year);
+    printDate(day, month, year);
+    cout << endl;
+    
+    // Демонстрация работы функции daysInMonth
+    cout << "\nКоличество дней в месяцах " << year << " года:" << endl;
+    for (int m = 1; m <= 12; m++) {
+        string monthName;
+        switch (m) {
+            case 1: monthName = "январь"; break;
+            case 2: monthName = "февраль"; break;
+            case 3: monthName = "март"; break;
+            case 4: monthName = "апрель"; break;
+            case 5: monthName = "май"; break;
+            case 6: monthName = "июнь"; break;
+            case 7: monthName = "июль"; break;
+            case 8: monthName = "август"; break;
+            case 9: monthName = "сентябрь"; break;
+            case 10: monthName = "октябрь"; break;
+            case 11: monthName = "ноябрь"; break;
+            case 12: monthName = "декабрь"; break;
+        }
+        cout << monthName << ": " << daysInMonth(m, year) << " дней" << endl;
+    }
+    
+    return 0;
+}
