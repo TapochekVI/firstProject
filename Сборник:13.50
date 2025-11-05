@@ -1,0 +1,116 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+
+using namespace std;
+
+const int NUM_TEAMS = 4; // Для примера возьмем 4 команды
+
+struct Team {
+    string name;
+    int points;
+    int wins;
+    int losses;
+    int draws;
+};
+
+void inputTournamentData(int table[][NUM_TEAMS], string teamNames[]) {
+    cout << "Введите названия команд:" << endl;
+    for (int i = 0; i < NUM_TEAMS; i++) {
+        cout << "Команда " << (i + 1) << ": ";
+        cin >> teamNames[i];
+    }
+    
+    cout << "\nВведите результаты матчей (3-победа, 1-ничья, 0-проигрыш):" << endl;
+    for (int i = 0; i < NUM_TEAMS; i++) {
+        for (int j = 0; j < NUM_TEAMS; j++) {
+            if (i == j) {
+                table[i][j] = 0; // Главная диагональ
+            } else {
+                cout << teamNames[i] << " - " << teamNames[j] << ": ";
+                cin >> table[i][j];
+            }
+        }
+    }
+}
+
+int main() {
+    int table[NUM_TEAMS][NUM_TEAMS] = {0};
+    string teamNames[NUM_TEAMS];
+    Team teams[NUM_TEAMS];
+    
+    // Ввод данных
+    inputTournamentData(table, teamNames);
+    
+    // Расчет статистики
+    for (int i = 0; i < NUM_TEAMS; i++) {
+        teams[i].name = teamNames[i];
+        teams[i].wins = 0;
+        teams[i].losses = 0;
+        teams[i].draws = 0;
+        teams[i].points = 0;
+        
+        for (int j = 0; j < NUM_TEAMS; j++) {
+            if (i != j) {
+                if (table[i][j] == 3) {
+                    teams[i].wins++;
+                    teams[i].points += 3;
+                } else if (table[i][j] == 1) {
+                    teams[i].draws++;
+                    teams[i].points += 1;
+                } else if (table[i][j] == 0) {
+                    teams[i].losses++;
+                }
+            }
+        }
+    }
+    
+    // Выполнение заданий
+    cout << "\n=== РЕЗУЛЬТАТЫ АНАЛИЗА ===" << endl;
+    
+    // а) Команды с больше побед, чем проигрышей
+    cout << "\nа) Команды с больше побед, чем проигрышей:" << endl;
+    for (int i = 0; i < NUM_TEAMS; i++) {
+        if (teams[i].wins > teams[i].losses) {
+            cout << "   " << teams[i].name << endl;
+        }
+    }
+    
+    // б) Команды без проигрышей
+    cout << "\nб) Команды без проигрышей:" << endl;
+    for (int i = 0; i < NUM_TEAMS; i++) {
+        if (teams[i].losses == 0) {
+            cout << "   " << teams[i].name << endl;
+        }
+    }
+    
+    // в) Чемпион
+    cout << "\nв) Чемпион:" << endl;
+    int maxPoints = 0;
+    string champion;
+    for (int i = 0; i < NUM_TEAMS; i++) {
+        if (teams[i].points > maxPoints) {
+            maxPoints = teams[i].points;
+            champion = teams[i].name;
+        }
+    }
+    cout << "   " << champion << " (" << maxPoints << " очков)" << endl;
+    
+    // д) Рейтинг команд
+    cout << "\nд) Рейтинг команд по местам:" << endl;
+    // Сортировка по очкам
+    for (int i = 0; i < NUM_TEAMS - 1; i++) {
+        for (int j = i + 1; j < NUM_TEAMS; j++) {
+            if (teams[i].points < teams[j].points) {
+                swap(teams[i], teams[j]);
+            }
+        }
+    }
+    
+    for (int i = 0; i < NUM_TEAMS; i++) {
+        cout << (i + 1) << ". " << teams[i].name << " (" << teams[i].points << " очков)" << endl;
+    }
+    
+    return 0;
+}
