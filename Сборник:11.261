@@ -1,0 +1,91 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <climits>
+
+using namespace std;
+
+int main() {
+    // Исходный массив слов
+    vector<string> words = {"программирование", "код", "компьютер", "алгоритм", 
+                           "структура", "к", "константа", "массив", "функция"};
+    
+    cout << "Исходный массив слов: ";
+    for (const auto& word : words) {
+        cout << word << " ";
+    }
+    cout << endl << endl;
+    
+    // а) Средняя длина слова
+    int totalLength = 0;
+    for (const auto& word : words) {
+        totalLength += word.length();
+    }
+    double avgLength = static_cast<double>(totalLength) / words.size();
+    cout << "а) Средняя длина слова: " << avgLength << endl;
+    
+    // б) Количество слов с более чем 5 символами
+    int countMoreThan5 = 0;
+    for (const auto& word : words) {
+        if (word.length() > 5) {
+            countMoreThan5++;
+        }
+    }
+    cout << "б) Количество слов с более чем 5 символами: " << countMoreThan5 << endl;
+    
+    // в) Количество символов в самом длинном слове
+    int maxLength = 0;
+    for (const auto& word : words) {
+        if (word.length() > maxLength) {
+            maxLength = word.length();
+        }
+    }
+    cout << "в) Количество символов в самом длинном слове: " << maxLength << endl;
+    
+    // г) Номер первого самого короткого слова
+    int minLength = INT_MAX;
+    int firstShortestIndex = -1;
+    for (int i = 0; i < words.size(); i++) {
+        if (words[i].length() < minLength) {
+            minLength = words[i].length();
+            firstShortestIndex = i;
+        }
+    }
+    cout << "г) Номер первого самого короткого слова: " << firstShortestIndex + 1 << endl;
+    
+    // д) Количество символов в слове, больше которого только в самом длинном слове
+    int secondMaxLength = 0;
+    for (const auto& word : words) {
+        if (word.length() > secondMaxLength && word.length() < maxLength) {
+            secondMaxLength = word.length();
+        }
+    }
+    // Если все слова одинаковой длины или есть только одно слово
+    if (secondMaxLength == 0 && maxLength > 0) {
+        secondMaxLength = maxLength;
+    }
+    cout << "д) Количество символов в слове, больше которого только в самом длинном слове: " 
+         << secondMaxLength << endl;
+    
+    // е) Количество слов, начинающихся на букву «к» или «К»
+    int countStartsWithK = 0;
+    for (const auto& word : words) {
+        if (!word.empty() && (word[0] == 'к' || word[0] == 'К')) {
+            countStartsWithK++;
+        }
+    }
+    cout << "е) Количество слов, начинающихся на 'к' или 'К': " << countStartsWithK << endl;
+    
+    // Массив слов в алфавитном порядке
+    vector<string> sortedWords = words;
+    sort(sortedWords.begin(), sortedWords.end());
+    
+    cout << "Массив слов в алфавитном порядке: ";
+    for (const auto& word : sortedWords) {
+        cout << word << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}
